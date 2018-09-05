@@ -23,30 +23,32 @@ public class IMU {
 
 	public IMU() throws UnsupportedBusNumberException, IOException {
 		bus = I2CFactory.getInstance(I2CBusImpl.BUS_0);
+		this.enableAccelerometer();
+		this.enableGyroscope();
 	}
 
-	void writeAccReg(int reg, byte value) throws IOException {
+	private void writeAccReg(int reg, byte value) throws IOException {
 		I2CDevice device = bus.getDevice(ACC_ADDRESS);
 		device.write(reg, value);
 	}
 
-	void writeMagReg(int reg, byte value) throws IOException {
+	private void writeMagReg(int reg, byte value) throws IOException {
 		I2CDevice device = bus.getDevice(MAG_ADDRESS);
 		device.write(reg, value);
 	}
 
-	void writeGyrReg(int reg, byte value) throws IOException {
+	private void writeGyrReg(int reg, byte value) throws IOException {
 		I2CDevice device = bus.getDevice(GYR_ADDRESS);
 		device.write(reg, value);
 	}
 
-	public void enableAccelerometer() throws IOException {
+	 private void enableAccelerometer() throws IOException {
 		writeAccReg(LSM303_CTRL_REG1_A, (byte) 0b01010111); // z,y,x axis enabled , 100Hz data rate
 		writeAccReg(LSM303_CTRL_REG4_A, (byte) 0b00101000); // +/- 8G full scale: FS = 10 on DLHC, high resolution
 															// output mode
 	}
 
-	public void enableGyroscope() throws IOException {
+	 private void enableGyroscope() throws IOException {
 		writeGyrReg(L3G_CTRL_REG1, (byte) 0b00001111); // Normal power mode, all axes enabled
 		writeGyrReg(L3G_CTRL_REG4, (byte) 0b00110000); // Continuous update, 2000 dps full scale
 	}
