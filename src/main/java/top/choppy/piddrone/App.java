@@ -37,6 +37,11 @@ public class App {
 
 	public static void main(String[] args) throws UnsupportedBusNumberException, IOException {
 		imu = new IMU();
+		if(true)
+		while(true) {
+		System.out.println(getPitch());
+}
+
 
 		Gpio.pwmSetMode(Gpio.PWM_MODE_MS);
 		Gpio.pwmSetClock(50);
