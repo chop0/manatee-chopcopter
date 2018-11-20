@@ -23,7 +23,7 @@ public class App {
 	public static BNO055 imu;
 
 	public static void main(String[] args) throws UnsupportedBusNumberException, IOException {
-		imu = BNO055.getInstance(BNO055.opmode_t.OPERATION_MODE_IMUPLUS, BNO055.vector_type_t.VECTOR_EULER,
+		imu = BNO055.getInstance(BNO055.OperationMode.OPERATION_MODE_IMUPLUS, BNO055.VectorType.VECTOR_EULER,
 				I2CBusImpl.BUS_0);
 		if (true)
 			while (true) {

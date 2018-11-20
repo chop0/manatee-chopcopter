@@ -20,9 +20,9 @@ public class BNO055 {
 
 	private static I2CBus imu;
 	private static I2CDevice device;
-	private static int _mode;
-	private static opmode_t requestedMode; // user requested mode of operation.
-	private static vector_type_t requestedVectorType;
+	private static int mode;
+	private static OperationMode requestedMode; // user requested mode of operation.
+	private static VectorType requestedVectorType;
 
 	// State machine variables
 	private volatile int state = 0;
@@ -35,12 +35,36 @@ public class BNO055 {
 	private volatile double[] xyz = new double[3];
 
 	public class SystemStatus {
-		public int system_status;
-		public int self_test_result;
-		public int system_error;
+		private int currentStatus;
+		private int systemError;
+		private int selfTestResult;
+
+		public int getCurrentStatus() {
+			return currentStatus;
+		}
+
+		public void setCurrentStatus(int currentStatus) {
+			this.currentStatus = currentStatus;
+		}
+
+		public int getSelfTestResult() {
+			return selfTestResult;
+		}
+
+		public void setSelfTestResult(int selfTestResult) {
+			this.selfTestResult = selfTestResult;
+		}
+
+		public int getSystemError() {
+			return systemError;
+		}
+
+		public void setSystemError(int systemError) {
+			this.systemError = systemError;
+		}
 	}
 
-	public enum reg_t {
+	public enum Register {
 		/* Page id register definition */
 		BNO055_PAGE_ID_ADDR(0X07),
 
@@ -125,7 +149,7 @@ public class BNO055 {
 
 		private final int val;
 
-		reg_t(int val) {
+		Register(int val) {
 			this.val = val;
 		}
 
@@ -134,12 +158,12 @@ public class BNO055 {
 		}
 	}
 
-	public enum powermode_t {
+	public enum PowerMode {
 		POWER_MODE_NORMAL(0X00), POWER_MODE_LOWPOWER(0X01), POWER_MODE_SUSPEND(0X02);
 
 		private final int val;
 
-		powermode_t(int val) {
+		PowerMode(int val) {
 			this.val = val;
 		}
 
@@ -148,7 +172,7 @@ public class BNO055 {
 		}
 	}
 
-	public enum opmode_t {
+	public enum OperationMode {
 		/* Operation mode settings */
 		OPERATION_MODE_CONFIG(0X00), OPERATION_MODE_ACCONLY(0X01), OPERATION_MODE_MAGONLY(0X02),
 		OPERATION_MODE_GYRONLY(0X03), OPERATION_MODE_ACCMAG(0X04), OPERATION_MODE_ACCGYRO(0X05),
@@ -158,7 +182,7 @@ public class BNO055 {
 
 		private final int val;
 
-		opmode_t(int val) {
+		OperationMode(int val) {
 			this.val = val;
 		}
 
@@ -168,11 +192,11 @@ public class BNO055 {
 	}
 
 	public class RevInfo {
-		public byte accel_rev;
-		public byte mag_rev;
-		public byte gyro_rev;
+		public byte accelRev;
+		public byte magRev;
+		public byte gyroRev;
 		public short sw_rev;
-		public byte bl_rev;
+		public byte blRev;
 	}
 
 	public class CalData {
@@ -182,17 +206,17 @@ public class BNO055 {
 		public byte mag;
 	}
 
-	public enum vector_type_t {
-		VECTOR_ACCELEROMETER(reg_t.BNO055_ACCEL_DATA_X_LSB_ADDR.getVal()),
-		VECTOR_MAGNETOMETER(reg_t.BNO055_MAG_DATA_X_LSB_ADDR.getVal()),
-		VECTOR_GYROSCOPE(reg_t.BNO055_GYRO_DATA_X_LSB_ADDR.getVal()),
-		VECTOR_EULER(reg_t.BNO055_EULER_H_LSB_ADDR.getVal()),
-		VECTOR_LINEARACCEL(reg_t.BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR.getVal()),
-		VECTOR_GRAVITY(reg_t.BNO055_GRAVITY_DATA_X_LSB_ADDR.getVal());
+	public enum VectorType {
+		VECTOR_ACCELEROMETER(Register.BNO055_ACCEL_DATA_X_LSB_ADDR.getVal()),
+		VECTOR_MAGNETOMETER(Register.BNO055_MAG_DATA_X_LSB_ADDR.getVal()),
+		VECTOR_GYROSCOPE(Register.BNO055_GYRO_DATA_X_LSB_ADDR.getVal()),
+		VECTOR_EULER(Register.BNO055_EULER_H_LSB_ADDR.getVal()),
+		VECTOR_LINEARACCEL(Register.BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR.getVal()),
+		VECTOR_GRAVITY(Register.BNO055_GRAVITY_DATA_X_LSB_ADDR.getVal());
 
 		private final int val;
 
-		vector_type_t(int val) {
+		VectorType(int val) {
 			this.val = val;
 		}
 
@@ -209,7 +233,7 @@ public class BNO055 {
 		executor.schedule(new BNO055UpdateTask(this), 0L, THREAD_PERIOD);
 	}
 
-	public static BNO055 getInstance(opmode_t mode, vector_type_t vectorType, int busNumber, byte address)
+	public static BNO055 getInstance(OperationMode mode, VectorType vectorType, int busNumber, byte address)
 			throws I2CFactory.UnsupportedBusNumberException, IOException {
 		if (instance == null) {
 			instance = new BNO055(busNumber, address);
@@ -219,7 +243,7 @@ public class BNO055 {
 		return instance;
 	}
 
-	public static BNO055 getInstance(opmode_t mode, vector_type_t vectorType, int busNumber)
+	public static BNO055 getInstance(OperationMode mode, VectorType vectorType, int busNumber)
 			throws I2CFactory.UnsupportedBusNumberException, IOException {
 		return getInstance(mode, vectorType, busNumber, BNO055_ADDRESS_A);
 	}
@@ -240,7 +264,7 @@ public class BNO055 {
 			switch (state) {
 			case 0:
 				// Wait for the sensor to be present
-				if ((0xFF & read8(reg_t.BNO055_CHIP_ID_ADDR)) != BNO055_ID) {
+				if ((0xFF & read8(Register.BNO055_CHIP_ID_ADDR)) != BNO055_ID) {
 					// Sensor not present, keep trying
 					sensorPresent = false;
 				} else {
@@ -253,7 +277,7 @@ public class BNO055 {
 			case 1:
 				if (currentTime >= nextTime) {
 					// Switch to config mode (just in case since this is the default)
-					setMode(opmode_t.OPERATION_MODE_CONFIG.getVal());
+					setMode(OperationMode.OPERATION_MODE_CONFIG.getVal());
 					nextTime = System.nanoTime() / 1000000000.0 + 0.050;
 					state++;
 				}
@@ -261,13 +285,13 @@ public class BNO055 {
 			case 2:
 				// Reset
 				if (currentTime >= nextTime) {
-					write8(reg_t.BNO055_SYS_TRIGGER_ADDR, (byte) 0x20);
+					write8(Register.BNO055_SYS_TRIGGER_ADDR, (byte) 0x20);
 					state++;
 				}
 				break;
 			case 3:
 				// Wait for the sensor to be present
-				if ((0xFF & read8(reg_t.BNO055_CHIP_ID_ADDR)) == BNO055_ID) {
+				if ((0xFF & read8(Register.BNO055_CHIP_ID_ADDR)) == BNO055_ID) {
 					// Sensor present, go to next state
 					state++;
 					// Log current time
@@ -278,7 +302,7 @@ public class BNO055 {
 				// Wait at least 50ms
 				if (currentTime >= nextTime) {
 					/* Set to normal power mode */
-					write8(reg_t.BNO055_PWR_MODE_ADDR, (byte) powermode_t.POWER_MODE_NORMAL.getVal());
+					write8(Register.BNO055_PWR_MODE_ADDR, (byte) PowerMode.POWER_MODE_NORMAL.getVal());
 					nextTime = System.nanoTime() / 1000000000.0 + 0.050;
 					state++;
 				}
@@ -286,14 +310,14 @@ public class BNO055 {
 			case 5:
 				// Use external crystal - 32.768 kHz
 				if (currentTime >= nextTime) {
-					write8(reg_t.BNO055_PAGE_ID_ADDR, (byte) 0x00);
+					write8(Register.BNO055_PAGE_ID_ADDR, (byte) 0x00);
 					nextTime = System.nanoTime() / 1000000000.0 + 0.050;
 					state++;
 				}
 				break;
 			case 6:
 				if (currentTime >= nextTime) {
-					write8(reg_t.BNO055_SYS_TRIGGER_ADDR, (byte) 0x80);
+					write8(Register.BNO055_SYS_TRIGGER_ADDR, (byte) 0x80);
 					nextTime = System.nanoTime() / 1000000000.0 + 0.500;
 					state++;
 				}
@@ -389,13 +413,13 @@ public class BNO055 {
 	 *
 	 * @param mode
 	 */
-	public void setMode(opmode_t mode) throws IOException {
+	public void setMode(OperationMode mode) throws IOException {
 		setMode(mode.getVal());
 	}
 
 	private void setMode(int mode) throws IOException {
-		_mode = mode;
-		write8(reg_t.BNO055_OPR_MODE_ADDR, (byte) _mode);
+		this.mode = mode;
+		write8(Register.BNO055_OPR_MODE_ADDR, (byte) this.mode);
 	}
 
 	/**
@@ -406,16 +430,21 @@ public class BNO055 {
 	public SystemStatus getSystemStatus() throws IOException {
 		SystemStatus status = new SystemStatus();
 
-		write8(reg_t.BNO055_PAGE_ID_ADDR, (byte) 0x00);
+		write8(Register.BNO055_PAGE_ID_ADDR, (byte) 0x00);
 
-		/*
-		 * System Status (see section 4.3.58) --------------------------------- 0 = Idle
-		 * 1 = System Error 2 = Initializing Peripherals 3 = System Initalization 4 =
-		 * Executing Self-Test 5 = Sensor fusion algorithm running 6 = System running
-		 * without fusion algorithms
+		/**
+		 * System Status (see section 4.3.58) 
+		 * --------------------------------- 
+		 * 0 = Idle
+		 * 1 = System Error
+		 * 2 = Initializing Peripherals 
+		 * 3 = System Initalization 4 =
+		 * 4 Executing Self-Test 
+		 * 5 = Sensor fusion algorithm running 
+		 * 6 = System running without fusion algorithms
 		 */
 
-		status.system_status = read8(reg_t.BNO055_SYS_STAT_ADDR);
+		status.currentStatus = read8(Register.BNO055_SYS_STAT_ADDR);
 
 		/*
 		 * Self Test Results (see section ) -------------------------------- 1 = test
@@ -427,7 +456,7 @@ public class BNO055 {
 		 * 0x0F = all good!
 		 */
 
-		status.self_test_result = read8(reg_t.BNO055_SELFTEST_RESULT_ADDR);
+		status.selfTestResult = read8(Register.BNO055_SELFTEST_RESULT_ADDR);
 
 		/*
 		 * System Error (see section 4.3.59) --------------------------------- 0 = No
@@ -438,7 +467,7 @@ public class BNO055 {
 		 * available 9 = Fusion algorithm configuration error A = Sensor configuration
 		 * error
 		 */
-		status.system_error = read8(reg_t.BNO055_SYS_ERR_ADDR);
+		status.systemError = read8(Register.BNO055_SYS_ERR_ADDR);
 		return status;
 	}
 
@@ -452,19 +481,19 @@ public class BNO055 {
 		RevInfo info = new RevInfo();
 
 		/* Check the accelerometer revision */
-		info.accel_rev = read8(reg_t.BNO055_ACCEL_REV_ID_ADDR);
+		info.accelRev = read8(Register.BNO055_ACCEL_REV_ID_ADDR);
 
 		/* Check the magnetometer revision */
-		info.mag_rev = read8(reg_t.BNO055_MAG_REV_ID_ADDR);
+		info.magRev = read8(Register.BNO055_MAG_REV_ID_ADDR);
 
 		/* Check the gyroscope revision */
-		info.gyro_rev = read8(reg_t.BNO055_GYRO_REV_ID_ADDR);
+		info.gyroRev = read8(Register.BNO055_GYRO_REV_ID_ADDR);
 
 		/* Check the SW revision */
-		info.bl_rev = read8(reg_t.BNO055_BL_REV_ID_ADDR);
+		info.blRev = read8(Register.BNO055_BL_REV_ID_ADDR);
 
-		a = read8(reg_t.BNO055_SW_REV_ID_LSB_ADDR);
-		b = read8(reg_t.BNO055_SW_REV_ID_MSB_ADDR);
+		a = read8(Register.BNO055_SW_REV_ID_LSB_ADDR);
+		b = read8(Register.BNO055_SW_REV_ID_MSB_ADDR);
 		info.sw_rev = (short) ((b << 8) | a);
 
 		return info;
@@ -501,7 +530,7 @@ public class BNO055 {
 	 */
 	public CalData getCalibration() throws IOException {
 		CalData data = new CalData();
-		int rawCalData = read8(reg_t.BNO055_CALIB_STAT_ADDR);
+		int rawCalData = read8(Register.BNO055_CALIB_STAT_ADDR);
 
 		data.sys = (byte) ((rawCalData >> 6) & 0x03);
 		data.gyro = (byte) ((rawCalData >> 4) & 0x03);
@@ -542,11 +571,11 @@ public class BNO055 {
 
 		CalData data = getCalibration();
 
-		if (sensorModeMap[_mode][0]) // Accelerometer used
+		if (sensorModeMap[mode][0]) // Accelerometer used
 			retVal = retVal && (data.accel >= 3);
-		if (sensorModeMap[_mode][1]) // Magnetometer used
+		if (sensorModeMap[mode][1]) // Magnetometer used
 			retVal = retVal && (data.mag >= 3);
-		if (sensorModeMap[_mode][2]) // Gyroscope used
+		if (sensorModeMap[mode][2]) // Gyroscope used
 			retVal = retVal && (data.gyro >= 3);
 
 		return retVal;
@@ -558,7 +587,7 @@ public class BNO055 {
 	 * @return temperature in degrees celsius.
 	 */
 	public int getTemp() throws IOException {
-		return (read8(reg_t.BNO055_TEMP_ADDR));
+		return (read8(Register.BNO055_TEMP_ADDR));
 	}
 
 	/**
@@ -585,19 +614,22 @@ public class BNO055 {
 	 * sensor clockwise two full rotations will return a value of 720 degrees. The
 	 * getVector method will return heading in a constrained 0 - 360 deg format if
 	 * required.
+	 * 
 	 * @return pitch in degrees
 	 */
 	public double getPitch() {
 
 		return this.getVector()[2];
 	}
+
 	/**
 	 * The heading of the sensor (y axis) in continuous format. Eg rotating the
 	 * sensor clockwise two full rotations will return a value of 720 degrees. The
 	 * getVector method will return heading in a constrained 0 - 360 deg format if
 	 * required.
+	 * 
 	 * @return roll in degrees
- 	*/
+	 */
 	public double getRoll() {
 		return this.getVector()[1];
 	}
@@ -622,18 +654,18 @@ public class BNO055 {
 	 * @return whatever I2CJNI.i2CWrite returns. It's not documented in the wpilib
 	 *         javadocs!
 	 */
-	private void write8(reg_t reg, byte value) throws IOException {
+	private void write8(Register reg, byte value) throws IOException {
 		device.write(reg.getVal(), value);
 	}
 
-	private byte read8(reg_t reg) throws IOException {
+	private byte read8(Register reg) throws IOException {
 		byte[] vals = new byte[1];
 
 		readLen(reg, vals);
 		return vals[0];
 	}
 
-	private boolean readLen(reg_t reg, byte[] buffer) throws IOException {
+	private boolean readLen(Register reg, byte[] buffer) throws IOException {
 		return readLen(reg.getVal(), buffer);
 	}
 
