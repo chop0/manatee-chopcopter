@@ -1,21 +1,21 @@
 package top.choppy.piddrone;
 
 public enum AngleTarget {
-	HOVER(0, 100);
+	HOVER(0d, 100d);
 
-	private final int target; // in kilograms
-	private final int alpha; // in meters
+	private final Double target; // in kilograms
+	private final Double alpha; // in metres
 
-	AngleTarget(int target, int alpha) {
+	AngleTarget(Double target, Double alpha) {
 		this.target = target;
 		this.alpha = alpha;
 	}
 
-	public int target() {
+	public Double target() {
 		return target;
 	}
 
-	public int alpha() {
+	public Double alpha() {
 		return alpha;
 	}
 }

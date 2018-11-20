@@ -1,6 +1,6 @@
-package top.choppy.piddrone;
+package top.choppy.imu;
 
-import static top.choppy.piddrone.IMUAddress.*;
+import static top.choppy.imu.OldIMUAddress.*;
 
 import java.io.IOException;
 
@@ -10,7 +10,7 @@ import com.pi4j.io.i2c.I2CFactory;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 import com.pi4j.io.i2c.impl.I2CBusImpl;
 
-public class IMU {
+public class OldIMU {
 
 	float A_GAIN = 0.0573f;
 	float G_GAIN = 0.070f;
@@ -21,7 +21,7 @@ public class IMU {
 		return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
 	}
 
-	public IMU() throws UnsupportedBusNumberException, IOException {
+	public OldIMU() throws UnsupportedBusNumberException, IOException {
 		bus = I2CFactory.getInstance(I2CBusImpl.BUS_0);
 		this.enableAccelerometer();
 		this.enableGyroscope();

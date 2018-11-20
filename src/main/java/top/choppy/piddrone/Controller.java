@@ -1,10 +1,10 @@
 package top.choppy.piddrone;
 
 public interface Controller<OutputType> {
-	int alpha = 100;
+	Double alpha = 100d;
 	
-	public int getAlpha();	
+	public OutputType getAlpha();	
 	
-	public void doTick(int angle);
+	public void doTick(OutputType angle);
 	
 }

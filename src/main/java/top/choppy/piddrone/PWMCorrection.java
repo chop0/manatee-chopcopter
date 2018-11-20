@@ -2,27 +2,27 @@ package top.choppy.piddrone;
 
 import com.pi4j.io.gpio.GpioPinPwmOutput;
 
-public class PWMCorrection implements Correction<Integer> {
+public class PWMCorrection implements Correction<Double> {
 	
-	Integer correction;
+	Double correction;
 	GpioPinPwmOutput pin;
 
-	public PWMCorrection(Integer correction, GpioPinPwmOutput pin) {
-		this.correction = correction;
+	public PWMCorrection(Double d, GpioPinPwmOutput pin) {
+		this.correction = d;
 		this.pin = pin;
 	}
 	
-	public void setCorrection(Integer correction) {
+	public void setCorrection(Double correction) {
 		this.correction = correction;
 		
 	}
 
-	public Integer getCorrection() {
+	public Double getCorrection() {
 		return correction;
 	}
 
 	public void correct() {
-		pin.setPwm(pin.getPwm() + this.getCorrection());
+		pin.setPwm((int) (pin.getPwm() + this.getCorrection()));
 	}
 
 }

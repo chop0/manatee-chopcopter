@@ -1,9 +1,9 @@
 package top.choppy.piddrone;
 
-public class PitchController implements Controller<Integer> {
+public class PitchController implements Controller<Double> {
 	public AngleTarget mode = AngleTarget.HOVER;
-	int alpha;
-	int targetPitch;
+	Double alpha;
+	Double targetPitch;
 
 	public PitchController(AngleTarget mode) {
 		this.mode = mode;
@@ -19,12 +19,12 @@ public class PitchController implements Controller<Integer> {
 		return this.mode;
 	}
 
-	public int getAlpha() {
+	public Double getAlpha() {
 		return alpha;
 	}
 
-	public void doTick(int angle) {
-		int currentPitch = angle;
+	public void doTick(Double d) {
+		Double currentPitch = d;
 
 		PWMCorrection correction1 = new PWMCorrection(alpha * (currentPitch - targetPitch), App.frontLeft);
 		PWMCorrection correction2 = new PWMCorrection(alpha * (currentPitch - targetPitch), App.frontRight);

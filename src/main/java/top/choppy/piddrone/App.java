@@ -7,7 +7,11 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinPwmOutput;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+import com.pi4j.io.i2c.impl.I2CBusImpl;
 import com.pi4j.wiringpi.Gpio;
+
+import top.choppy.imu.BNO055;
+import top.choppy.imu.OldIMU;
 
 public class App {
 	public static GpioController gpio = GpioFactory.getInstance();
@@ -16,32 +20,15 @@ public class App {
 	public static GpioPinPwmOutput backLeft = gpio.provisionPwmOutputPin(RaspiPin.GPIO_13);
 	public static GpioPinPwmOutput backRight = gpio.provisionPwmOutputPin(RaspiPin.GPIO_14);
 
-	public static IMU imu;
-
-	public static float gyroXangle = 0;
-	public static float gyroYangle = 0;
-	public static float gyroZangle = 0;
-
-	private static int getPitch() {
-		
-		return (int) gyroYangle;
-	}
-
-	private static int getRoll() {
-		return (int) gyroXangle;
-	}
-
-	private static int getYaw() {
-		return (int) gyroZangle;
-	}
+	public static BNO055 imu;
 
 	public static void main(String[] args) throws UnsupportedBusNumberException, IOException {
-		imu = new IMU();
-		if(true)
-		while(true) {
-		System.out.println(getPitch());
-}
-
+		imu = BNO055.getInstance(BNO055.opmode_t.OPERATION_MODE_IMUPLUS, BNO055.vector_type_t.VECTOR_EULER,
+				I2CBusImpl.BUS_0);
+		if (true)
+			while (true) {
+				System.out.println(imu.getPitch());
+			}
 
 		Gpio.pwmSetMode(Gpio.PWM_MODE_MS);
 		Gpio.pwmSetClock(50);
@@ -55,11 +42,9 @@ public class App {
 		PitchController pitchControl = new PitchController(AngleTarget.HOVER);
 		RollController rollControl = new RollController(AngleTarget.HOVER);
 
-		new Thread(new GyroThread()).start();
-
 		while (true) {
-			pitchControl.doTick(getPitch());
-			rollControl.doTick(getRoll());
+			pitchControl.doTick(imu.getPitch());
+			rollControl.doTick(imu.getRoll());
 		}
 
 	}

@@ -1,6 +1,6 @@
-package top.choppy.piddrone;
+package top.choppy.imu;
 
-public class IMUAddress {
+public class OldIMUAddress {
 	public static int MAG_ADDRESS = (0x3C >> 1);
 	public static int ACC_ADDRESS = (0x32 >> 1);
 	public static int ACC_ADDRESS_SA0_A_LOW = (0x30 >> 1);

@@ -1,9 +1,9 @@
 package top.choppy.piddrone;
 
-public class RollController implements Controller<Integer> {
+public class RollController implements Controller<Double> {
 	public AngleTarget mode = AngleTarget.HOVER;
-	int alpha;
-	int targetRoll;
+	Double alpha;
+	Double targetRoll;
 
 	public RollController(AngleTarget mode) {
 		this.mode = mode;
@@ -19,12 +19,12 @@ public class RollController implements Controller<Integer> {
 		return this.mode;
 	}
 
-	public int getAlpha() {
+	public Double getAlpha() {
 		return alpha;
 	}
 
-	public void doTick(int angle) {
-		int currentRoll = angle;
+	public void doTick(Double d) {
+		double currentRoll = d;
 
 		PWMCorrection correction1 = new PWMCorrection(alpha * (currentRoll - targetRoll), App.frontRight);
 		PWMCorrection correction2 = new PWMCorrection(alpha * (currentRoll - targetRoll), App.frontRight);
