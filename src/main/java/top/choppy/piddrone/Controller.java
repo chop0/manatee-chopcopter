@@ -7,4 +7,6 @@ public interface Controller<OutputType> {
 	
 	public void doTick(OutputType angle);
 	
+	
+	
 }
