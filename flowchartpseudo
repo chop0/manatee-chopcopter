@@ -1,0 +1,58 @@
+  Tell control thread to take off; Hover; before_check: if(Do we have a command from the app?) { if(Is the command to go left?) { Set the target acceleration to 1,0,0 for 
+      one second; Hover;
+    } else if(Is the command to go right?) {
+      Set the target acceleration to -1,0,0 for one second; Hover;
+    } else if(Is the command to go up?) {
+      Set the target acceleration to 0,1,0 for one second; Hover;
+      
+    } else if(Is the command to go down?) {
+      Set the target acceleration to 0,-1,0 for one second; Hover;
+    } else if(Is the command to go forward?) {
+      Set the target acceleration to 0,0,1 for one second; Hover;
+    } else if(Is the command to go back?) {
+      Set the target acceleration to 0,0,-1 for one second; Hover;
+    }
+    goto before_check;
+  }
+}
+block imu { block euler { function calculate { X angle = xLSB / 16.0; Y angle = yLSB / 16.0; Z angle = zLSB / 16.0;
+    }
+  }
+  block acceleration { function calculate { X acceleration = xLSB / 100.0; Y acceleration = yLSB / 100.0; Z acceleration = zLSB / 100.0;
+  }
+  function get values { return X,Y,Z;
+  }
+}
+}
+block control { Start; branch( corrections ) [Branch a]{ while true { Correct Pitch; Correct Roll; Correct Acceleration;
+  }
+}
+function set target angle { target pitch and roll = new pitch and roll;
+}
+function set target acceleration { target acceleration = new acceleration
+}
+function hover { set target angle(0,0); while true { set target acceleration(0.1m/s^2); set target acceleration(-0.1m/s^2);
+      }      
+}
+function Take Off { set target acceleration(1m/s^2); delay for 1 second; hover;
+}
+function Correct Pitch { if(Correction Needed?) { Front Left Motor Correction = alpha * (current pitch - target pitch); Front Right Motor Correction = alpha * (current 
+  		pitch - target pitch); Back Left Motor Correction = -(alpha * (current pitch - target pitch); Back Right Motor Correction = -(alpha * (current pitch - 
+  		target pitch));
+}
+}
+function Correct Roll { if(Correction Needed?) { Front Left Motor Correction = alpha * (current pitch - target pitch); Back Left Motor Correction = alpha * (current pitch - 
+  		target pitch); Front Right Motor Correction = -(alpha * (current pitch - target pitch); Back Right Motor Correction = -(alpha * (current pitch - target 
+  		pitch));
+}
+}
+function Correct Acceleration { if(Correction is up/down) { Motor Correction = alpha * (current acceleration - target acceleration)
+  }
+  else if(Correction is left/right) { Motor Correction for right motors = alpha * (current acceleration - target acceleration); Motor Correction for left motors = -(alpha * 
+        (current acceleration - target acceleration));
+  } else if(Correction is forward/backward) {
+        Motor Correction for back motors = alpha * (current acceleration - target acceleration); Motor Correction for front motors = -(alpha * (current acceleration - 
+        target acceleration));
+  }
+}
+}

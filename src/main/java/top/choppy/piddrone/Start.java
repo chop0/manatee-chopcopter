@@ -39,13 +39,26 @@ public class Start {
 		backLeft.setPwm(1250);
 		backRight.setPwm(1250);
 
-		PitchController pitchControl = new PitchController(AngleTarget.HOVER);
-		RollController rollControl = new RollController(AngleTarget.HOVER);
+		new Thread(new Runnable() {
 
-		while (true) {
-			pitchControl.doTick(imu.getPitch());
-			rollControl.doTick(imu.getRoll());
-		}
+			@Override
+			public void run() {
+				PitchController pitchControl = new PitchController(AngleTarget.HOVER);
+				while (true)
+					pitchControl.doTick(imu.getPitch());
+
+			}
+		}).start();
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				RollController rollControl = new RollController(AngleTarget.HOVER);
+				while (true)
+					rollControl.doTick(imu.getRoll());
+
+			}
+		}).start();
 
 	}
 }
