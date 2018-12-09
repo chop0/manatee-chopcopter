@@ -26,10 +26,10 @@ public class PitchController implements Controller<Double> {
 	public void doTick(Double d) {
 		Double currentPitch = d;
 
-		PWMCorrection correction1 = new PWMCorrection(alpha * (currentPitch - targetPitch), App.frontLeft);
-		PWMCorrection correction2 = new PWMCorrection(alpha * (currentPitch - targetPitch), App.frontRight);
-		PWMCorrection correction3 = new PWMCorrection(-(alpha * (currentPitch - targetPitch)), App.backLeft);
-		PWMCorrection correction4 = new PWMCorrection(-(alpha * (currentPitch - targetPitch)), App.backRight);
+		PWMCorrection correction1 = new PWMCorrection(alpha * (currentPitch - targetPitch), Start.frontLeft);
+		PWMCorrection correction2 = new PWMCorrection(alpha * (currentPitch - targetPitch), Start.frontRight);
+		PWMCorrection correction3 = new PWMCorrection(-(alpha * (currentPitch - targetPitch)), Start.backLeft);
+		PWMCorrection correction4 = new PWMCorrection(-(alpha * (currentPitch - targetPitch)), Start.backRight);
 
 		correction1.correct();
 		correction2.correct();

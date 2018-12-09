@@ -1,6 +1,9 @@
 package top.choppy.piddrone;
 
 public enum AngleTarget {
+	/**
+	 * In a hovering position
+	 */
 	HOVER(0d, 100d);
 
 	private final Double target; // in kilograms
@@ -11,6 +14,7 @@ public enum AngleTarget {
 		this.alpha = alpha;
 	}
 
+	
 	public Double target() {
 		return target;
 	}

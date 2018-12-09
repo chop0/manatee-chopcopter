@@ -13,7 +13,7 @@ import com.pi4j.wiringpi.Gpio;
 import top.choppy.imu.BNO055;
 import top.choppy.imu.OldIMU;
 
-public class App {
+public class Start {
 	public static GpioController gpio = GpioFactory.getInstance();
 	public static GpioPinPwmOutput frontLeft = gpio.provisionPwmOutputPin(RaspiPin.GPIO_11);
 	public static GpioPinPwmOutput frontRight = gpio.provisionPwmOutputPin(RaspiPin.GPIO_12);

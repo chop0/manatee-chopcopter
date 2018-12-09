@@ -26,10 +26,10 @@ public class RollController implements Controller<Double> {
 	public void doTick(Double d) {
 		double currentRoll = d;
 
-		PWMCorrection correction1 = new PWMCorrection(alpha * (currentRoll - targetRoll), App.frontRight);
-		PWMCorrection correction2 = new PWMCorrection(alpha * (currentRoll - targetRoll), App.frontRight);
-		PWMCorrection correction3 = new PWMCorrection(-(alpha * (currentRoll - targetRoll)), App.backLeft);
-		PWMCorrection correction4 = new PWMCorrection(-(alpha * (currentRoll - targetRoll)), App.backLeft);
+		PWMCorrection correction1 = new PWMCorrection(alpha * (currentRoll - targetRoll), Start.frontRight);
+		PWMCorrection correction2 = new PWMCorrection(alpha * (currentRoll - targetRoll), Start.frontRight);
+		PWMCorrection correction3 = new PWMCorrection(-(alpha * (currentRoll - targetRoll)), Start.backLeft);
+		PWMCorrection correction4 = new PWMCorrection(-(alpha * (currentRoll - targetRoll)), Start.backLeft);
 
 		correction1.correct();
 		correction2.correct();

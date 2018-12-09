@@ -7,6 +7,11 @@ import com.pi4j.io.i2c.I2CFactory;
 import java.io.IOException;
 import java.util.TimerTask;
 
+/**
+ * 
+ * @author Alec Petridis
+ * A driver class for the BNO055 IMU
+ */
 public class BNO055 {
 	// Tread variables
 	private java.util.Timer executor;
@@ -459,13 +464,19 @@ public class BNO055 {
 		status.selfTestResult = read8(Register.BNO055_SELFTEST_RESULT_ADDR);
 
 		/*
-		 * System Error (see section 4.3.59) --------------------------------- 0 = No
-		 * error 1 = Peripheral initialization error 2 = System initialization error 3 =
-		 * Self test result failed 4 = Register map value out of range 5 = Register map
-		 * address out of range 6 = Register map write error 7 = BNO low power mode not
-		 * available for selected operation mode 8 = Accelerometer power mode not
-		 * available 9 = Fusion algorithm configuration error A = Sensor configuration
-		 * error
+		 * System Error (see section 4.3.59) 
+		 * ---------------------------------
+		 *  0 = No error
+		 *  1 = Peripheral initialization error
+		 *  2 = System initialization error
+		 *  3 = Self test result failed 
+		 *  4 = Register map value out of range 
+		 *  5 = Register map address out of range 
+		 *  6 = Register map write error 
+		 *  7 = BNO low power mode not available for selected operation mode 
+		 *  8 = Accelerometer power mode not available 
+		 *  9 = Fusion algorithm configuration error 
+		 *  A = Sensor configuration error
 		 */
 		status.systemError = read8(Register.BNO055_SYS_ERR_ADDR);
 		return status;
