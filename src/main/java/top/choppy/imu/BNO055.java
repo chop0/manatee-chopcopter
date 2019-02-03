@@ -654,7 +654,8 @@ public class BNO055 {
 	 * @return yaw in degrees
 	 */
 	public double getYaw() {
-		return xyz[0] + turns * 360;
+		return this.getVector()[0];
+		//return xyz[0] + turns * 360;
 	}
 
 	/**
